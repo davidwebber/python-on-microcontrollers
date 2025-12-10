@@ -29,6 +29,7 @@ def random_color():
     return random.randrange(0, 7) * 32
 
 def wait_for_button():
+    last_state = True
     while True:
         current_state = button.value
         if last_state and not current_state:
@@ -48,11 +49,10 @@ def lightsaber():
     # ignite
     for i in range(nLED):
         dots[i] = blade_color
-        #time.sleep(0.1)
         dots.show()
     wait_for_button()
     # retract
-    for i in range(nLED,0,-1):
+    for i in range(nLED-1,-1,-1):
         dots[i] = (0,0,0)
         dots.show()
     
@@ -61,7 +61,7 @@ def larson_scanner():
     pattern = [(100,0,0),(200,0,0),(255,0,0),(255,0,0),(200,0,0),(100,0,0)]
     _start = 0
     _end = nLED - len(pattern)
-    direction = 1
+    _direction = 1
     while True:
         for offset in range(_start, _end, _direction):
             for i in range(nLED):
@@ -74,34 +74,25 @@ def larson_scanner():
                     return
                 last_state = current_state
             dots.show()
-        _start, _end, direction = _end, _start, -1*direction
+        _start, _end, _direction = _end, _start, -1*_direction
     
 def matrix():
-    pass
+    global dots
+    dots[0] = (0,100,0) 
 
 def xmas():
-    pass
+    global dots
+    dots[0] = (0,100,0)
+    dots[1] = (100,0,0)
             
 # MAIN LOOP
-while True:
-    # Fill each dot with a random color
-    #print("Filling Dots")
-    for dot in range(nLED):
-        #dots[dot] = (random_color(), random_color(), random_color())
-        #dots[dot] = (0, random_color(), 0)
-        dots[dot] = (random_color(), 0, 0)
-
-    dots.show()
-    wait_for_button()
-    time.sleep(0.20)
-
+def loop():
     lightsaber()
-
     wait_for_button()
-
     larson_scanner()
-
     matrix()
-
+    #wait_for_button()
     xmas()
+
+loop()
     

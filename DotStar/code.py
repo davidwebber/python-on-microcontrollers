@@ -24,8 +24,8 @@ while True:
     # Fill each dot with a random color
     #print("Filling Dots")
     for dot in range(n_dots):
-        #dots[dot] = (random_color(), random_color(), random_color())
+        dots[dot] = (random_color(), random_color(), random_color())
         #dots[dot] = (0, random_color(), 0)
-        dots[dot] = (random_color(), 0, 0)
+        #dots[dot] = (random_color(), 0, 0)
 
     time.sleep(0.20)
