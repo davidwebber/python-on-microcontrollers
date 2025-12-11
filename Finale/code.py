@@ -23,6 +23,8 @@ button = digitalio.DigitalInOut(board.GP16)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP   # Uses internal pull-up resistor
 
+black = (0,0,0)
+
 # HELPERS
 # a random color 0 -> 192
 def random_color():
@@ -30,9 +32,21 @@ def random_color():
 
 def wait_for_button():
     last_state = True
+    time.sleep(0.1)
     while True:
         current_state = button.value
         if last_state and not current_state:
+            break
+        last_state = current_state
+        time.sleep(0.1)
+    while not button.value:
+        time.sleep(0.1)
+
+def wait_for_button_release():
+    last_state = False
+    while True:
+        current_state = button.value
+        if not last_state and current_state:
             break
         last_state = current_state
         time.sleep(0.1)
@@ -47,23 +61,37 @@ def lightsaber():
     dots.show()
     wait_for_button()
     # ignite
-    for i in range(nLED):
-        dots[i] = blade_color
+    speed = 5
+    for i in range(0, nLED, speed):
+        for j in range(nLED):
+            dots[j] = blade_color if j<i else black
         dots.show()
     wait_for_button()
     # retract
-    for i in range(nLED-1,-1,-1):
-        dots[i] = (0,0,0)
+    for i in range(nLED-1,-1,-1*speed):
+        for j in range(nLED):
+            dots[j] = blade_color if j<i else black
         dots.show()
+    dots[:] = [black] * nLED
+    dots.show()
     
 def larson_scanner():
     last_state = True
-    pattern = [(100,0,0),(200,0,0),(255,0,0),(255,0,0),(200,0,0),(100,0,0)]
+    pattern = [
+        ( 50,0,0),
+        (100,0,0),
+	(200,0,0),
+	(255,0,0),
+	(255,0,0),
+	(200,0,0),
+	(100,0,0),
+        ( 50,0,0)
+        ]
     _start = 0
     _end = nLED - len(pattern)
-    _direction = 1
+    _speed = 3
     while True:
-        for offset in range(_start, _end, _direction):
+        for offset in range(_start, _end, _speed):
             for i in range(nLED):
                 if i < offset or i >= offset+len(pattern):
                     dots[i] = (0,0,0)
@@ -74,7 +102,7 @@ def larson_scanner():
                     return
                 last_state = current_state
             dots.show()
-        _start, _end, _direction = _end, _start, -1*_direction
+        _start, _end, _speed = _end, _start, -1*_speed
     
 def matrix():
     global dots
@@ -86,13 +114,37 @@ def xmas():
     dots[1] = (100,0,0)
             
 # MAIN LOOP
-def loop():
+while True: 
+    print("starting lightsaber")
     lightsaber()
+    print("stopping lightsaber")
+   
+    dots[0]=(32,0,0)
+    dots.show()
+    print("waiting for button")
     wait_for_button()
-    larson_scanner()
-    matrix()
-    #wait_for_button()
-    xmas()
 
-loop()
+    print("starting larson scanner")
+    larson_scanner()
+    print("stopping larson scanner")
+
+    dots[:] = [black]*nLED
+    dots[0]=(0,32,0)
+    dots.show()
+    print("waiting for button")
+    wait_for_button()
+
+    print("starting matrix")
+    matrix()
+    print("stopping matrix")
+
+    dots[0]=(32,0,0)
+    dots[1]=(0,32,0)
+    dots.show()
+    print("waiting for button")
+    wait_for_button()
+
+    print("starting xmas")
+    xmas()
+    print("stopping xmas")
     
