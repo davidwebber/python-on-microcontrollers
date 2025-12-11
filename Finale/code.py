@@ -24,6 +24,10 @@ button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP   # Uses internal pull-up resistor
 
 black = (0,0,0)
+blue  = (0,0,255)
+white = (255,255,255)
+green = (0,255,0)
+red   = (255,0,0)
 
 # HELPERS
 # a random color 0 -> 192
@@ -110,8 +114,34 @@ def matrix():
 
 def xmas():
     global dots
-    dots[0] = (0,100,0)
-    dots[1] = (100,0,0)
+    blue_white = [blue]*3 + [black]*3 + [white]*3 + [black]*3
+    red_green  = [red]*3  + [black]*3 + [green]*3 + [black]*3
+    max_bright = 100
+    min_bright = 0
+    speed = -5
+    pattern = red_green
+    n_pattern = 0
+    last_state = True
+    while True:
+        for b in range(max_bright, min_bright, speed):
+            for i in range(nLED):
+                color = pattern[i % len(pattern)]
+                dots[i] = (color[0]*b/100, color[1]*b/100, color[2]*b/100)
+            dots.show()
+            current_state = button.value
+            if not current_state and last_state:
+                return
+            last_state = current_state
+        max_bright, min_bright, speed = min_bright, max_bright, -1*speed
+        if b > 80:
+            time.sleep(1)
+        if b < 20:
+            if n_pattern == 0:
+                pattern = blue_white
+                n_pattern = 1
+            else:
+                pattern = red_green
+                n_pattern = 0
             
 # MAIN LOOP
 while True: 
@@ -126,9 +156,9 @@ while True:
 
     print("starting larson scanner")
     larson_scanner()
-    print("stopping larson scanner")
-
     dots[:] = [black]*nLED
+    print("stopping larson scanner")
+    """
     dots[0]=(0,32,0)
     dots.show()
     print("waiting for button")
@@ -137,7 +167,7 @@ while True:
     print("starting matrix")
     matrix()
     print("stopping matrix")
-
+    """
     dots[0]=(32,0,0)
     dots[1]=(0,32,0)
     dots.show()
